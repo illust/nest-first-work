@@ -21,12 +21,12 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data: {
-          email: dto.email,
+          phonenumber: dto.phonenumber,
           hash,
         },
       });
 
-      return this.signToken(user.id, user.email);
+      return this.signToken(user.id, user.phonenumber);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -40,7 +40,7 @@ export class AuthService {
     // find the user by email
     const user = await this.prisma.user.findUnique({
       where: {
-        email: dto.email,
+        phonenumber: dto.phonenumber,
       },
     });
     // if user does not exist throw exception
@@ -54,16 +54,16 @@ export class AuthService {
       throw new ForbiddenException('Credentials incorrect');
     }
 
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.phonenumber);
   }
 
   async signToken(
     userId: number,
-    email: string,
+    phonenumber: string,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
-      email,
+      phonenumber,
     };
     const secret = this.config.get('JWT_SECRET');
 
